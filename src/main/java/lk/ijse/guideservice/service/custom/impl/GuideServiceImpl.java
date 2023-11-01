@@ -162,6 +162,18 @@ public class GuideServiceImpl implements GuideService {
 
     }
 
+    @Override
+    public List<GuideDTO> searchByText(String text) {
+
+        text = "%" + text + "%";
+
+        return guideRepository
+                .searchByText(text, text, text, text)
+                .stream()
+                .map(this::getDTO)
+                .toList();
+    }
+
     private GuideDTO getDTO(Guide guide) {
 
         GuideDTO guideDTO = modelMapper.map(guide, GuideDTO.class);

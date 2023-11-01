@@ -25,4 +25,6 @@ public interface GuideService extends SuperService {
     List<GuideDTO> getAll();
 
     GuideDTO findById(Integer guideId);
+
+    List<GuideDTO> searchByText(String text);
 }

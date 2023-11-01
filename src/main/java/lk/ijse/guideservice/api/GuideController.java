@@ -1,7 +1,9 @@
 package lk.ijse.guideservice.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lk.ijse.guideservice.dto.GuideDTO;
+import lk.ijse.guideservice.entity.Role;
+import lk.ijse.guideservice.exception.UnauthorizedException;
 import lk.ijse.guideservice.service.custom.GuideService;
 import lk.ijse.guideservice.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +30,13 @@ public class GuideController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseUtil saveGuide(@RequestParam("imageList") List<MultipartFile> imageList,
-                                  @RequestParam String guide) throws IOException {
+    public ResponseUtil saveGuide(@RequestPart("imageList") List<MultipartFile> imageList,
+                                  @Valid @RequestPart("guide") GuideDTO guideDTO,
+                                  @RequestHeader("X-ROLE") Role role) throws IOException {
 
+        if (!role.equals(Role.ADMIN_GUIDE))
+            throw new UnauthorizedException("Un authorized access to application");
 
-        GuideDTO guideDTO = new ObjectMapper().readValue(guide, GuideDTO.class);
         return ResponseUtil
                 .builder()
                 .code(200)
@@ -43,10 +47,13 @@ public class GuideController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseUtil updateGuide(@RequestParam("imageList") List<MultipartFile> imageList,
-                                           @RequestParam String guide) throws IOException {
+    public ResponseUtil updateGuide(@RequestPart("imageList") List<MultipartFile> imageList,
+                                    @Valid @RequestPart("guide") GuideDTO guideDTO,
+                                    @RequestHeader("X-ROLE") Role role) throws IOException {
 
-        GuideDTO guideDTO = new ObjectMapper().readValue(guide, GuideDTO.class);
+        if (!role.equals(Role.ADMIN_GUIDE))
+            throw new UnauthorizedException("Un authorized access to application");
+
         return ResponseUtil
                 .builder()
                 .code(200)
@@ -57,7 +64,10 @@ public class GuideController {
 
 
     @DeleteMapping(params = {"guideId"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseUtil deleteGuide(@RequestParam Integer guideId){
+    public ResponseUtil deleteGuide(@RequestParam Integer guideId, @RequestHeader("X-ROLE") Role role){
+
+        if (!role.equals(Role.ADMIN_GUIDE))
+            throw new UnauthorizedException("Un authorized access to application");
 
         guideService.deleteGuide(guideId);
         return ResponseUtil
@@ -79,7 +89,12 @@ public class GuideController {
     }
 
     @GetMapping(value = "/getAll", params = {"page", "count"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseUtil getGuidePageable(@RequestParam Integer page,@RequestParam Integer count){
+    public ResponseUtil getGuidePageable(@RequestParam Integer page,
+                                         @RequestParam Integer count,
+                                         @RequestHeader("X-ROLE") Role role){
+
+        if (!role.equals(Role.ADMIN_GUIDE))
+            throw new UnauthorizedException("Un authorized access to application");
 
         return ResponseUtil
                 .builder()
@@ -93,5 +108,19 @@ public class GuideController {
     public List<GuideDTO> getAll(){
 
         return guideService.getAll();
+    }
+
+    @GetMapping(value = "/search", params = {"text"}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseUtil searchByText(@RequestParam String text, @RequestHeader("X-ROLE") Role role) {
+
+        if (!role.equals(Role.ADMIN_GUIDE))
+            throw new UnauthorizedException("Un authorized access to application");
+
+        return ResponseUtil
+                .builder()
+                .code(200)
+                .message("Search guide by text successfully !")
+                .data(guideService.searchByText(text))
+                .build();
     }
 }

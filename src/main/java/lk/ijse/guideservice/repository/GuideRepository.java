@@ -18,4 +18,10 @@ public interface GuideRepository extends JpaRepository<Guide, Integer> {
 
     @Query(value = "from Guide g")
     List<Guide> getGuideHQLWithPageable(Pageable pageable);
+
+    @Query(value = "select g from Guide g where g.name like ?1 " +
+            "or g.address like ?2 " +
+            "or g.gender like ?3 " +
+            "or g.contact like ?4 ")
+    List<Guide> searchByText(String t1, String t2, String t3, String t4);
 }
