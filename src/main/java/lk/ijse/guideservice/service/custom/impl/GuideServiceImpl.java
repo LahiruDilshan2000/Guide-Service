@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -39,6 +40,8 @@ public class GuideServiceImpl implements GuideService {
     @Override
     public GuideDTO saveGuide(GuideDTO guideDTO, List<MultipartFile> imageList) throws IOException {
 
+        Optional<Guide> last = guideRepository.findLastInsertedData();
+
         if (imageList.size() != 5)
             throw new NotFoundException("Guide All images not found !");
 
@@ -50,6 +53,11 @@ public class GuideServiceImpl implements GuideService {
 
         Guide guide = modelMapper.map(guideDTO, Guide.class);
 
+        if (last.isPresent()){
+            guide.setGuideId(last.get().getGuideId()+1);
+        }else {
+            guide.setGuideId(1);
+        }
         guide.setFolderLocation(folderPath);
         guide.setGuideImage(saveAndGetPath(folderPath, "1", imageList.get(0)));
         guide.setNicImage1(saveAndGetPath(folderPath, "2", imageList.get(1)));
@@ -135,7 +143,7 @@ public class GuideServiceImpl implements GuideService {
         PageRequest pageRequest = PageRequest.of(page, count);
 
         return guideRepository
-                .getGuideHQLWithPageable(pageRequest)
+                .findAll(pageRequest)
                 .stream()
                 .map(this::getDTO)
                 .toList();
@@ -165,8 +173,6 @@ public class GuideServiceImpl implements GuideService {
     @Override
     public List<GuideDTO> searchByText(String text) {
 
-        text = "%" + text + "%";
-
         return guideRepository
                 .searchByText(text, text, text, text)
                 .stream()
@@ -177,8 +183,6 @@ public class GuideServiceImpl implements GuideService {
     private GuideDTO getDTO(Guide guide) {
 
         GuideDTO guideDTO = modelMapper.map(guide, GuideDTO.class);
-
-        System.out.println(guide.getDatesList().toArray().length);
 
         try {
 

@@ -31,11 +31,7 @@ public class GuideController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseUtil saveGuide(@RequestPart("imageList") List<MultipartFile> imageList,
-                                  @Valid @RequestPart("guide") GuideDTO guideDTO,
-                                  @RequestHeader("X-ROLE") Role role) throws IOException {
-
-        if (!role.equals(Role.ADMIN_GUIDE))
-            throw new UnauthorizedException("Un authorized access to application");
+                                  @Valid @RequestPart("guide") GuideDTO guideDTO) throws IOException {
 
         return ResponseUtil
                 .builder()
@@ -48,11 +44,7 @@ public class GuideController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseUtil updateGuide(@RequestPart("imageList") List<MultipartFile> imageList,
-                                    @Valid @RequestPart("guide") GuideDTO guideDTO,
-                                    @RequestHeader("X-ROLE") Role role) throws IOException {
-
-        if (!role.equals(Role.ADMIN_GUIDE))
-            throw new UnauthorizedException("Un authorized access to application");
+                                    @Valid @RequestPart("guide") GuideDTO guideDTO) throws IOException {
 
         return ResponseUtil
                 .builder()
@@ -64,10 +56,7 @@ public class GuideController {
 
 
     @DeleteMapping(params = {"guideId"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseUtil deleteGuide(@RequestParam Integer guideId, @RequestHeader("X-ROLE") Role role){
-
-        if (!role.equals(Role.ADMIN_GUIDE))
-            throw new UnauthorizedException("Un authorized access to application");
+    public ResponseUtil deleteGuide(@RequestParam Integer guideId){
 
         guideService.deleteGuide(guideId);
         return ResponseUtil
@@ -90,11 +79,7 @@ public class GuideController {
 
     @GetMapping(value = "/getAll", params = {"page", "count"}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseUtil getGuidePageable(@RequestParam Integer page,
-                                         @RequestParam Integer count,
-                                         @RequestHeader("X-ROLE") Role role){
-
-        if (!role.equals(Role.ADMIN_GUIDE))
-            throw new UnauthorizedException("Un authorized access to application");
+                                         @RequestParam Integer count){
 
         return ResponseUtil
                 .builder()
@@ -104,17 +89,14 @@ public class GuideController {
                 .build();
     }
 
-    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/getAll", produces = {MediaType.APPLICATION_JSON_VALUE})
     public List<GuideDTO> getAll(){
 
         return guideService.getAll();
     }
 
     @GetMapping(value = "/search", params = {"text"}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseUtil searchByText(@RequestParam String text, @RequestHeader("X-ROLE") Role role) {
-
-        if (!role.equals(Role.ADMIN_GUIDE))
-            throw new UnauthorizedException("Un authorized access to application");
+    public ResponseUtil searchByText(@RequestParam String text) {
 
         return ResponseUtil
                 .builder()

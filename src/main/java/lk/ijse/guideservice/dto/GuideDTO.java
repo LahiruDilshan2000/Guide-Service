@@ -1,9 +1,6 @@
 package lk.ijse.guideservice.dto;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.*;
-import lk.ijse.guideservice.entity.GuideDates;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,5 +50,4 @@ public class GuideDTO {
 
     private List<byte[]> imageList;
 
-    private List<GuideDatesDTO> datesList;
 }
